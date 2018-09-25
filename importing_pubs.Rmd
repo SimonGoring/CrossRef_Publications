@@ -1,6 +1,8 @@
 ---
 title: "Adding Neotoma Publications"
-author: "Simon Goring"
+author:
+- affiliation: University of Wisconsin - Madison
+  name: Simon Goring
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
   word_document: default
@@ -35,10 +37,26 @@ opts_chunk$set(tidy.opts = list(width.cutoff = 60),
                tidy = TRUE)
 ```
 
-# Project Purpose
-Currently (09/03/2016) the Neotoma Database has limited information in the `publication` table.  The information is stored as a wide table, but many records only contain a `PublicationID` key, year of publication and the full text citation, along with ContactIDs for the main authors.  This links through the `publicationauthors` table, but in practice the fields there are not always filled (although the `ContactID` is filled).
+# Introduction
+
+For many Neotoma datasets, the Database has limited information in the `publication` table as a result of legacy decisions, mostly a result of imports from other data aggregations.  Publication information is stored as a wide table, but many records only contain a `publicationid` key, year of publication and the full text citation, along with contactids for the main authors.  To help support ongoing data citation and best-practices in the management of data resources it would be best if Neotoma could support the export of data using data standards that are widely accepted and supported.  Both [DublinCore] and the `bibJSON` [REF] format are well accepted formats that are supported by clear documentation.  Publishers, in addition, support data access through the CrossRef API.  The [CrossRef API is well documented](ref), and contains a number of key fields.  Thus, the current challenge for Neotoma is to manage our references in such a way that researchers can easily access data associated with dataset-related publciations, that we can place constraints on our publication tables to assure content quality is maintained in the upload process, and that data is returned through the API in such a way that it conforms to both researcher expectations and best practices for machine-assisted data harvesting.
+
+# Current Data Format
+
+The publication information in Neotoma is spread across several tables within the database (Figure 1).  The publication table contains information strictly about the publication and contains no information about individuals.  This information, along with author and editor order, is contained in the `publicationauthors` and `publicationeditors` tables.  The `contactid` field is a foreign key that links to the primary key of the `publicationauthors` and `publicationeditors` tables.  In practice the fields in `contacts` are not always filled.
+
+<figure>
+<img src="images/pub_relations.svg">
+<figcaption><b>Figure 1</b>. Neotoma Paleoecological Database publication relationships.  Foreign keys within the database are indicated using hashed lines, primary keys are contained within light blue boxes.</figshare>
 
 ```{r, echo = FALSE, results = 'asis', messages=FALSE, warnings=FALSE}
+
+library(RODBC, quietly = TRUE, verbose = FALSE)
+
+con <- odbcConnect("Neotoma", uid="SA", pwd="c@mpf1re")
+
+con <- odbcDriverConnect('Driver={ODBC Driver 11 for SQL Server};Server=localhost;Database=Neotoma;Uid=SA;Pwd=c@mpf1re;')
+
 library(RMySQL, quietly = TRUE, verbose = FALSE)
 
 mydb <- dbConnect(MySQL(), user = 'root', password = 'c@mpf1re', 
@@ -51,11 +69,11 @@ pander::pandoc.table(publications[1,c(1, 3, 4, 5)], table.split.cells = 8,
 
 ```
 
-Of all the `r nrow(publications)` records, `r sum(is.na(publications$DOI))` have no existing DOI.  Additionally, `r sum(is.na(publications$ArticleTitle))` have no reliable title (except as part of the citation).  No record (as far as I can tell) contains the full, rich data needed for bibJSON output.  
+Of all the `r nrow(publications)` records, `r sum(is.na(publications$DOI))` have no existing DOI.  Additionally, `r sum(is.na(publications$ArticleTitle))` have no reliable title (except as part of the `citation` field).  No record (as far as I can tell) contains the full, rich data needed for bibJSON output. 
 
 # bibJSON Briefly
 
-A fuller definition of the standard is available [online](http://okfnlabs.org/bibjson/), but the idea is for a light & portable standard to represent bibliographic metadata using JSON (or JSON-LD).  While bibJSON uses a default set of keys defined for `BibTeX`, part of bibJSON's beauty is that it has no defined namespace limits, so if we decide, as a community, to add extra data to the format (like the inclusion of IGSNs), then we can do that as well without breaking the standard.
+A [fuller definition of the bibJSON standard](http://okfnlabs.org/bibjson/) is available online, but the idea is for a light & portable standard to represent bibliographic metadata using JSON (or JSON-LD).  While bibJSON uses a default set of keys defined for `BibTeX`, part of bibJSON's beauty is that it has no defined namespace limits, so if we decide, as a community, to add extra data to the format (like the inclusion of IGSNs), then we can do that as well without breaking the standard.
 
 ## The bibJSON Schema
 
@@ -82,7 +100,7 @@ The bibJSON format looks something like this (from [http://okfnlabs.org/bibjson/
 }
 ```
 
-That seems fairly straightforward.  It maps well onto BibTeX and gives us a rich set of information that we can ingest into any number of other uses (like LiPD).  Can Neotoma map to it easily?
+`bibJSON` is intended to map onto bibtex to provide ease of use for information transfer and re-use.  The standard can also  provide arich set of information that can then be ingested into any number of other data resources that use JSON-LD formats, including [codemeta], [LiPD], and others.
 
 ## How well does Neotoma Map onto bibJSON?
 
@@ -139,37 +157,34 @@ Luckily, we can make use of the [CrossRef Metadata API](http://labs.crossref.org
              "created":{"date-parts":[[2009,7,10]],
                         "date-time":"2009-07-10T09:40:02Z",
                         "timestamp":1247218802000},
-                        "page":"301-308",
-                        "source":"CrossRef",
-                        "title":["The magnitude of error in conventional bulk-sediment radiocarbon dates from central North 
-                                  America"],
-                        "prefix":"http:\/\/id.crossref.org\/prefix\/10.1016",
-                        "volume":"72",
-                        "author":[{"affiliation":[],"family":"Grimm","given":"Eric C."},
-                                  {"affiliation":[],"family":"Maher","given":"Louis J.","suffix":"Jr."},
-                                  {"affiliation":[],"family":"Nelson","given":"David M."}],
-                        "member":"http:\/\/id.crossref.org\/member\/78",
-                        "container-title":["Quaternary Research"],
-                        "link":[{"intended-application":"text-mining",
-                                 "content-version":"vor",
-                                 "content-type":"text\/xml",
-                                   "URL":"http:\/\/api.elsevier.com\/content\/article\
-                                          /PII:S003358940900057X?httpAccept=text\/xml"},
-                                 {"intended-application":"text-mining",
-                                  "content-version":"vor",
-                                  "content-type":"text\/plain",
-                                  "URL":"http:\/\/api.elsevier.com\/content\/article\
-                                         /PII:S003358940900057X?httpAccept=text\/plain"}],
-                        "deposited":{"date-parts":[[2015,12,19]],
-                                     "date-time":"2015-12-19T21:05:03Z",
-                                     "timestamp":1450559103000},
-                        "score":1.0,
-                        "subtitle":[],
-                        "issued":{"date-parts":[[2009,9]]},
-                        "alternative-id":["S003358940900057X"],
-                        "URL":"http:\/\/dx.doi.org\/10.1016\/j.yqres.2009.05.006",
-                        "ISSN":["0033-5894"],
-                        "subject":["Earth-Surface Processes","Earth and Planetary Sciences(all)"]}}
+             "page":"301-308",
+             "source":"CrossRef",
+             "title":["The magnitude of error in conventional bulk-sediment radiocarbon dates from central North America"],
+             "prefix":"http:\/\/id.crossref.org\/prefix\/10.1016",
+             "volume":"72",
+             "author":[{"affiliation":[],"family":"Grimm","given":"Eric C."},
+                       {"affiliation":[],"family":"Maher","given":"Louis J.","suffix":"Jr."},
+                       {"affiliation":[],"family":"Nelson","given":"David M."}],
+             "member":"http:\/\/id.crossref.org\/member\/78",
+             "container-title":["Quaternary Research"],
+             "link":[{"intended-application":"text-mining",
+                      "content-version":"vor",
+                      "content-type":"text\/xml",
+                      "URL":"http:\/\/api.elsevier.com\/content\/article\/PII:S003358940900057X?httpAccept=text\/xml"},
+                     {"intended-application":"text-mining",
+                      "content-version":"vor",
+                      "content-type":"text\/plain",
+                      "URL":"http:\/\/api.elsevier.com\/content\/article\/PII:S003358940900057X?httpAccept=text\/plain"}],
+             "deposited":{"date-parts":[[2015,12,19]],
+                          "date-time":"2015-12-19T21:05:03Z",
+                          "timestamp":1450559103000},
+             "score":1.0,
+             "subtitle":[],
+             "issued":{"date-parts":[[2009,9]]},
+             "alternative-id":["S003358940900057X"],
+             "URL":"http:\/\/dx.doi.org\/10.1016\/j.yqres.2009.05.006",
+             "ISSN":["0033-5894"],
+             "subject":["Earth-Surface Processes","Earth and Planetary Sciences(all)"]}}
 ```
 
 So . . . pretty rich.
