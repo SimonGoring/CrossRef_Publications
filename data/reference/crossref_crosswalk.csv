@@ -1,0 +1,56 @@
+Variable,Type,Within,Example
+indexed,object,,
+date-parts,"[yyyy,mm,dd]",indexed,"[[2015,12,22]]"
+date-time,string,indexed,"""2015-12-22T11:07:51Z"""
+timestamp,integer,indexed,1450782471165
+deposited,object,,
+date-parts,"[yyyy,mm,dd]",deposited,"[[2015,12,22]]"
+date-time,string,deposited,"""2015-12-22T11:07:51Z"""
+timestamp,integer,deposited,1450782471165
+reference-count,integer,,44
+publisher,string,,Elsevier BV
+issue,integer,,2
+title,Array - string,,"[""The magnitude of error in conventional bulk-sediment radiocarbon dates from central North America""]"
+container-title,Array - string,,"[""Quaternary Research""]"
+license,object,,
+content-version,string,license,"""tdm"""
+delay-in-days,integer,license,0
+start,object,license,
+date-parts,"[yyyy,mm,dd]",start,"[[2015,12,22]]"
+date-time,string,start,"""2015-12-22T11:07:51Z"""
+timestamp,integer,start,1450782471165
+URL,string,license,"""http:\/\/www.elsevier.com\/tdm\/userlicense\/1.0\/"""
+published-print,object,,
+date-parts,"[yyyy,mm,dd]",published-print,"[[2015,12,22]]"
+date-time,string,published-print,"""2015-12-22T11:07:51Z"""
+timestamp,integer,published-print,1450782471165
+DOI,string,,
+type,string,,"""journal-article"""
+created,object,,
+date-parts,"[yyyy,mm,dd]",created,"[[2015,12,22]]"
+date-time,string,created,"""2015-12-22T11:07:51Z"""
+timestamp,integer,created,1450782471165
+page,string,,"""301-308"""
+source,string,,"""CrossRef"""
+prefix,string,,"""http:\/\/id.crossref.org\/prefix\/10.1016"""
+volume,string,,"""12"""
+author,object,,
+affiliation,string,author,[]
+family,string,author,"""Grimm"""
+given,string,author,"""Eric C."""
+member,string,,"""http:\/\/id.crossref.org\/member\/78"""
+link,object,,
+intended-application,string,link,text-mining
+content-version,string,link,vor
+content-type,string,link,"""text\/xml"""
+URL,string,link,"""http:\/\/api.elsevier.com\/content\/article\/PII:S003358940900057X?httpAccept=text\/xml"""
+score,float,,1
+subtitle,string,,[]
+issued,object,,
+date-parts,"[yyyy,mm,dd]",issued,"[[2015,12,22]]"
+date-time,string,issued,"""2015-12-22T11:07:51Z"""
+timestamp,integer,issued,1450782471165
+alternative-id,Array-string,,"[""S003358940900057X""]"
+URL,string,,"""http:\/\/dx.doi.org\/10.1016\/j.yqres.2009.05.006"""
+ISSN,Array - string,,"[""0033-5894""]"
+subject,Array - string,,"[""Earth-Surface Processes"",""Earth and Planetary Sciences(all)""]"
