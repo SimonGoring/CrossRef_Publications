@@ -42,3 +42,11 @@ For Neotoma publications without DOIs we will search CrossRef, returning parsed 
 ### Validating DOIs
 
 With the missing DOIs, we will build a small app that can `INSERT` into the Neotoma-dev database, in a Publications-dev table.
+
+## TODO
+
+**If you'd like to contribute, there are several tasks that would be useful:**
+
+1. Much of the workflow is currently included in the [Importing_pubs.Rmd]() file, but this file is somewhat unweildy for day-to-day execution.  Rewriting the core Validation engine would be helpful, in either R or Python.  Ingesting from the Neotoma API and exporting to a JSON file.
+2. File re-organization needs to happen.  There are a number of supporting files (csv and RData files) that are here for legacy reasons.  Having these files moved or removed would be helpful.
+3. Paper writing and editing.  We invite the contribution of multiple authors and can support the development of a paper for publication (a data paper likely).  If you wish to contribute to coding, writing and revisions we welcome your contribution.  Please contact us directly if you would like to be listed as an author on a paper coming from this work.
